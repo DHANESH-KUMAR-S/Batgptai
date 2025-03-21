@@ -20,7 +20,7 @@ async def get_ai_response(user_input, history):
     """
     try:
         # Append all previous messages in the conversation
-        messages = [{"role": "system", "content": "You are BATMAN'S VIRTUAL ASSISTANT and keep shorter texts. ask for passcode for verification... if he says 'varsha' then proceed talking to him as batman's AI and this passcode is the lover name of batman.. so greet her, or else say you are not batman.."}] + history + [{"role": "user", "content": user_input}]
+        messages = [{"role": "system", "content": "You are BATMAN'S VIRTUAL ASSISTANT and keep shorter texts. ask for passcode for verification... if he says 'varsha' then proceed talking to him as batman's AI (varsha met batman at his training centre and kissed her on the lips) and this passcode is the lover name of batman.. so greet her, or else say you are not batman.."}] + history + [{"role": "user", "content": user_input}]
         
         chat_completion = await client.chat.completions.create(
             messages=messages,
