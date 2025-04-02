@@ -1,5 +1,7 @@
 from flask import Flask, render_template, request, jsonify
-import google.generativeai as genai
+import os
+import asyncio
+from groq import AsyncGroq
 
 # Initialize Flask app
 app = Flask(__name__)
@@ -8,29 +10,28 @@ app.config['TEMPLATES_AUTO_RELOAD'] = True
 # Store chat history
 chat_history = []
 
-# Configure Gemini API
-API_KEY = "AIzaSyCOFOoppNQRakvBcKyKmWHEHpMBPODi9s4"
-genai.configure(api_key=API_KEY)
-model = genai.GenerativeModel('gemini-1.5-pro')
+# Load the environment variable for the Groq API key
+client = AsyncGroq(api_key="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")
 
-def get_ai_response(user_input, history):
+# Function to get AI response
+async def get_ai_response(user_input, history):
     """
-    Sends the user input along with history to Gemini API and retrieves the AI response.
+    Sends the user input along with history to Groq API and retrieves the AI response.
     """
     try:
-        # Format history into a single text input
-        history_text = "\n".join([f"{msg['role']}: {msg['content']}" for msg in history])
-        prompt = f"You are BATMAN'S aka BRUCE WAYNE's VIRTUAL ASSISTANT. Keep responses short. " \
-                 f"Ask for a passcode for verification. If he says 'Gotham', proceed.\n" \
-                 f"Previous conversation:\n{history_text}\nUser: {user_input}"
-
-        response = model.generate_content(prompt)
-        return response.text.strip()
+        # Append all previous messages in the conversation
+        messages = [{"role": "system", "content": "You are BATMAN'S aka BRUCE WAYNE's VIRTUAL ASSISTANT and keep shorter texts. ask for passcode for verification... if he says 'Gotham' proceed talking to him."}] + history + [{"role": "user", "content": user_input}]
+        
+        chat_completion = await client.chat.completions.create(
+            messages=messages,
+            model="llama3-8b-8192"
+        )
+        return chat_completion.choices[0].message.content.strip()
     except Exception as e:
         return f"An error occurred: {e}"
 
 # Route to handle frontend rendering
-@app.route('/')
+@app.route('/') 
 def index():
     return render_template('index.html')
 
@@ -44,7 +45,7 @@ def chat():
     chat_history.append({"role": "user", "content": user_message})
     
     # Get AI response
-    response = get_ai_response(user_message, chat_history)
+    response = asyncio.run(get_ai_response(user_message, chat_history))
     
     # Add the AI response to the history
     chat_history.append({"role": "assistant", "content": response})
