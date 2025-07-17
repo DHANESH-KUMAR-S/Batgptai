@@ -11,7 +11,7 @@ app.config['TEMPLATES_AUTO_RELOAD'] = True
 chat_history = []
 
 # Load the environment variable for the Groq API key
-client = AsyncGroq(api_key="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")
+client = AsyncGroq(api_key="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)
 
 # Function to get AI response
 async def get_ai_response(user_input, history):
